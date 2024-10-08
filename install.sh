@@ -150,9 +150,11 @@ install_nvim_lsps() {
 # Main script execution
 install_packages
 install_nvim_lsps
-stow .
-echo "sourcing .zshrc"
+"stowing"
+stow -t "$HOME" .
+echo "changing shell"
 chsh -s /bin/zsh
+echo "sourcing .zshrc"
 source $HOME/.zshrc
 echo "Installation complete."
 
