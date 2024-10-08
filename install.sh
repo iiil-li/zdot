@@ -161,12 +161,12 @@ install_nvim_lsps() {
 # Main script execution
 # Main script execution
 install_packages
-install_neovim
-install_fzf
+
 
 # Stow the dotfiles before modifying .zshrc
 stow_dotfiles
-
+install_neovim
+install_fzf
 # Install Powerlevel10k after stowing .zshrc
 install_powerlevel10k
 
