@@ -68,24 +68,27 @@ install_packages() {
 }
 
 # Prompt the user for Powerlevel10k installation
-install_powerlevel10k() {
-    echo "Do you want to install Powerlevel10k (p10k) on this machine? (yes/no)"
-    read -r install_p10k
+#!/bin/bash
 
-    if [ "$install_p10k" = "yes" ]; then
-        echo "Installing Powerlevel10k..."
-        
-        # Check if zinit is installed and install it if necessary
-        ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
-        if [ ! -d "$ZINIT_HOME" ]; then
-            echo "Installing Zinit..."
-            mkdir -p "$(dirname "$ZINIT_HOME")"
-            git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
-        fi
-        
-        # Add Powerlevel10k to .zshrc if the user agrees
-        echo "Adding Powerlevel10k configuration to .zshrc..."
-        cat <<EOT >> ~/.zshrc
+# Prompt the user about installing Powerlevel10k
+echo "Do you want to install Powerlevel10k (p10k) on this machine? (yes/no)"
+read -r install_p10k
+
+# Function to install Powerlevel10k
+install_powerlevel10k() {
+    echo "Installing Powerlevel10k..."
+    
+    # Check if zinit is installed and install it if necessary
+    ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+    if [ ! -d "$ZINIT_HOME" ]; then
+        echo "Installing Zinit..."
+        mkdir -p "$(dirname "$ZINIT_HOME")"
+        git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+    fi
+    
+    # Add Powerlevel10k to .zshrc
+    echo "Adding Powerlevel10k configuration to .zshrc..."
+    cat <<EOT >> ~/.zshrc
 
 # Powerlevel10k configuration
 if [ -d "\$ZINIT_HOME" ]; then
@@ -94,12 +97,17 @@ if [ -d "\$ZINIT_HOME" ]; then
     [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 fi
 EOT
-
-        echo "Powerlevel10k installed. To configure, run 'p10k configure'."
-    else
-        echo "Skipping Powerlevel10k installation."
-    fi
+    
+    echo "Powerlevel10k installed. To configure, run 'p10k configure'."
 }
+
+# Proceed with Powerlevel10k installation if user selects "yes"
+if [ "$install_p10k" = "yes" ]; then
+    install_powerlevel10k
+else
+    echo "Skipping Powerlevel10k installation."
+fi
+
 
 
 
@@ -164,7 +172,6 @@ install_nvim_lsps() {
 # Main script execution
 install_packages
 stow_configs
-install_powerlevel10k
 install_nvim_lsps
 echo "sourcing .zshrc"
 chsh -s /bin/zsh
