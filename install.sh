@@ -171,8 +171,8 @@ install_nvim_lsps() {
 
 # Main script execution
 install_packages
-stow_configs
 install_nvim_lsps
+stow .
 echo "sourcing .zshrc"
 chsh -s /bin/zsh
 source $HOME/.zshrc
