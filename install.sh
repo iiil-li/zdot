@@ -127,6 +127,5 @@ install_fzf
 install_powerlevel10k
 
 # Install Neovim LSPs after Neovim is installed
-install_nvim_lsps
 
 echo "Installation complete."

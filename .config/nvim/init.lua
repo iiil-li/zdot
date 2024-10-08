@@ -21,29 +21,7 @@ vim.opt.rtp:prepend(lazypath)
 -- Lazy's list of plugins
 require('lazy').setup({
 	{ 'folke/tokyonight.nvim' },
-	{ 'VonHeikemen/lsp-zero.nvim', branch = 'v3.x' },
-	{ 'neovim/nvim-lspconfig' },
-	{ 'hrsh7th/cmp-nvim-lsp' },
-	{ 'hrsh7th/nvim-cmp' },
-	{
-		"jose-elias-alvarez/null-ls.nvim",
-		dependencies = { "nvim-lua/plenary.nvim" }, -- Null-ls depends on plenary.nvim
-		config = function()
-			local null_ls = require("null-ls")
-			null_ls.setup({
-				sources = {
-					null_ls.builtins.diagnostics.markdownlint.with({
-						command = vim.fn.stdpath("data") .. "/mason/bin/markdownlint", -- Path to markdownlint installed via Mason
-						filetypes = { "markdown" },
-						extra_args = { "--disable", "MD013" }, -- Disable specific rule, e.g., MD013 (line length)
-					}),
-					null_ls.builtins.formatting.markdownlint.with({
-						command = vim.fn.stdpath("data") .. "/mason/bin/markdownlint", -- Formatting using markdownlint
-					}),
-				},
-			})
-		end,
-	},
+
 
 	{ 'L3MON4D3/LuaSnip' },
 	{ 'ellisonleao/gruvbox.nvim' },
@@ -62,9 +40,6 @@ require('lazy').setup({
 		'ThePrimeagen/harpoon',
 		dependencies = { 'nvim-lua/plenary.nvim' }
 	},
-	{ 'williamboman/mason.nvim',           config = true },
-	{ 'williamboman/mason-lspconfig.nvim', config = true },
-	--log highlihgting
 	{ 'mtdl9/vim-log-highlighting' }
 })
 
@@ -76,81 +51,6 @@ vim.cmd('filetype plugin indent on')
 -- Set colorscheme
 vim.cmd [[colorscheme gruvbox]]
 
--- LSP setup
-local lsp_zero = require('lsp-zero').preset({})
-require("mason").setup()
-require('mason-lspconfig').setup()
-
-
-lsp_zero.on_attach(function(client, bufnr)
-	lsp_zero.default_keymaps({ buffer = bufnr })
-
-	-- Formatting on save
-	if client.server_capabilities.documentFormattingProvider then
-		vim.api.nvim_create_autocmd("BufWritePre", {
-			buffer = bufnr,
-			callback = function() vim.lsp.buf.format({ async = false }) end
-		})
-	end
-
-	-- Keybinding for manual formatting
-	vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>f", "<cmd>lua vim.lsp.buf.format({ async = true })<CR>",
-		{ noremap = true, silent = true })
-end)
-
-lsp_zero.setup()
-
--- Lazy install an LSP when requested
-local function install_lsp(lsp_name)
-	vim.cmd('MasonInstall ' .. lsp_name)
-end
-
--- Function to check and install LSP on request
-local function request_lsp_install(lsp_name)
-	local present, lspconfig = pcall(require, 'lspconfig')
-
-	if present and lspconfig[lsp_name] then
-		lspconfig[lsp_name].setup({})
-	else
-		print('LSP not found. Installing ' .. lsp_name .. '...')
-		install_lsp(lsp_name)
-	end
-end
-
--- Command to install LSP dynamically (e.g., `:LspInstall bashls`)
-vim.api.nvim_create_user_command('LspInstall', function(opts)
-	request_lsp_install(opts.args)
-end, {
-	nargs = 1,
-	complete = function()
-		-- Return a list of available LSPs for autocompletion
-		return vim.tbl_keys(require('mason-lspconfig.mappings.server').package_to_lspconfig)
-	end,
-})
-
--- Example keybinding to install LSPs (optional)
-vim.api.nvim_set_keymap('n', '<leader>li', ':LspInstall<Space>', { noremap = true, silent = false })
-
--- Optional: If you want automatic formatting on save
-vim.cmd [[autocmd BufWritePre *.md lua vim.lsp.buf.format({ async = true })]]
-
--- Enable line wrapping for log files
-vim.cmd [[ autocmd BufRead,BufNewFile *.log setlocal wrap ]]
-
--- nvim-cmp setup
-local cmp = require('cmp')
-local cmp_action = require('lsp-zero').cmp_action()
-
-cmp.setup({
-	mapping = cmp.mapping.preset.insert({
-		['<C-Space>'] = cmp.mapping.complete(),
-		['<C-f>'] = cmp_action.luasnip_jump_forward(),
-		['<C-b>'] = cmp_action.luasnip_jump_backward(),
-		['<CR>'] = cmp.mapping.confirm({ select = false }),
-		['<Tab>'] = cmp_action.tab_complete(),
-		['<S-Tab>'] = cmp_action.select_prev_or_fallback(),
-	})
-})
 -- Toggle "document mode" on and off
 vim.api.nvim_set_keymap('n', '<leader>d', ':lua ToggleDocumentMode()<CR>', { noremap = true, silent = true })
 
