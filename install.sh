@@ -64,10 +64,21 @@ install_fzf() {
     ~/.fzf/install --all
 }
 
-# Main script execution
-install_packages
-install_neovim
-install_fzf
+# Stow the dotfiles from ~/zdot
+stow_dotfiles() {
+    echo "Stowing dotfiles from ~/zdot..."
+    
+    # Ensure that the dotfiles directory exists and stow them
+    if [ -d ~/zdot ]; then
+        # Navigate to zdot directory and stow the contents
+        cd ~/zdot || exit
+        stow --target=$HOME .
+        echo "Dotfiles stowed successfully."
+    else
+        echo "Dotfiles directory ~/zdot not found!"
+        exit 1
+    fi
+}
 
 # Function to install Powerlevel10k
 install_powerlevel10k() {
@@ -148,13 +159,18 @@ install_nvim_lsps() {
 }
 
 # Main script execution
+# Main script execution
 install_packages
-install_nvim_lsps
-"stowing"
-stow -t "$HOME" .
-echo "changing shell"
-chsh -s /bin/zsh
-echo "sourcing .zshrc"
-/bin/zsh "source $HOME/.zshrc"
-echo "Installation complete."
+install_neovim
+install_fzf
 
+# Stow the dotfiles before modifying .zshrc
+stow_dotfiles
+
+# Install Powerlevel10k after stowing .zshrc
+install_powerlevel10k
+
+# Install Neovim LSPs after Neovim is installed
+install_nvim_lsps
+
+echo "Installation complete."
