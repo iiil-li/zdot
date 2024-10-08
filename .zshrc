@@ -47,12 +47,16 @@ precmd() {
     print -Pn "\e]2;$(whoami)@$HOST: %~\a"
   fi
 }
-#add powerlevel10k
+#add powerlevel10k, if requested
 
-zinit ice depth=1; zinit light romkatv/powerlevel10k
+# Powerlevel10k configuration
+if [ -d "$ZINIT_HOME" ]; then
+    if [ -f ~/.p10k.zsh ]; then
+        source ~/.p10k.zsh
+    fi
+    zinit ice depth=1; zinit light romkatv/powerlevel10k
+fi
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 #add zsh plugins
 zinit light zsh-users/zsh-syntax-highlighting

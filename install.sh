@@ -66,6 +66,7 @@ install_packages() {
         echo "Unsupported OS. Please install packages manually."
     fi
 }
+
 # Prompt the user for Powerlevel10k installation
 install_powerlevel10k() {
     echo "Do you want to install Powerlevel10k (p10k) on this machine? (yes/no)"
@@ -82,7 +83,7 @@ install_powerlevel10k() {
             git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
         fi
         
-        # Add Powerlevel10k to .zshrc
+        # Add Powerlevel10k to .zshrc if the user agrees
         echo "Adding Powerlevel10k configuration to .zshrc..."
         cat <<EOT >> ~/.zshrc
 
@@ -99,6 +100,8 @@ EOT
         echo "Skipping Powerlevel10k installation."
     fi
 }
+
+
 
 # Prompt for Neovim LSPs to install via Mason and lsp-zero
 install_nvim_lsps() {
