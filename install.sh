@@ -31,28 +31,26 @@ install_packages() {
     fi
 }
 
-# Install the latest version of Neovim from GitHub
+# Install the latest version of Neovim from GitHub pre-built binaries
 install_neovim() {
-    echo "Installing Neovim from GitHub..."
+    echo "Installing Neovim from GitHub pre-built binaries..."
+
+    # Download the latest release of Neovim (v0.9.2 stable as an example, but you can script the latest version dynamically)
+    curl -LO https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
     
-    # Clone Neovim repository
-    git clone https://github.com/neovim/neovim.git
+    # Extract the tarball
+    tar xzf nvim-linux64.tar.gz
     
-    # Switch to stable branch
-    cd neovim || exit
-    git checkout stable
+    # Move the extracted files to /opt/nvim (or anywhere in your PATH)
+    sudo mv nvim-linux64 /opt/nvim
     
-    # Build Neovim
-    make CMAKE_BUILD_TYPE=Release
+    # Symlink the nvim binary to /usr/local/bin to make it globally accessible
+    sudo ln -s /opt/nvim/bin/nvim /usr/local/bin/nvim
     
-    # Install Neovim
-    sudo make install
-    
-    # Go back to the home directory
-    cd ..
-    
-    # Remove Neovim source after installation (optional)
-    rm -rf neovim
+    # Clean up the downloaded tarball
+    rm nvim-linux64.tar.gz
+
+    echo "Neovim installation complete."
 }
 
 # Install fzf from GitHub
