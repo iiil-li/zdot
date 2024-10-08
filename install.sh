@@ -1,29 +1,70 @@
 #!/bin/bash
 
-# Install necessary packages
+# Define an array of packages to install (one per line)
+packages=(
+	zsh
+	tmux
+	stow
+    nnn
+    ncdu
+    tree
+    htop
+    rsync
+    neovim
+)
+
+# Check if sudo is installed
+check_and_install_sudo() {
+    if ! command -v sudo &> /dev/null; then
+        echo "sudo is not installed. Attempting to install..."
+
+        # Switch to root and install sudo
+        echo "Please enter the root password to switch to root and install sudo."
+        su -c 'if [ -f /etc/debian_version ]; then
+                apt update && apt install -y sudo;
+              elif [ -f /etc/arch-release ]; then
+                pacman -Syu --noconfirm sudo;
+              else
+                echo "Unsupported OS. Please install sudo manually.";
+                exit 1;
+              fi'
+
+        if ! command -v sudo &> /dev/null; then
+            echo "Failed to install sudo. Exiting."
+            exit 1
+        fi
+    fi
+
+    # Check if the user is already in the sudoers file
+    if ! sudo -l | grep -q "(ALL) ALL"; then
+        echo "Adding $USER to the sudoers file..."
+        
+        # Directly append to /etc/sudoers (use visudo for safety in real usage)
+        su -c "echo '$USER ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
+        
+        echo "$USER has been added to sudoers. Please log out and log back in to apply group changes."
+        exit 0
+    else
+        echo "$USER is already in the sudoers file."
+    fi
+}
+
+# Function to install necessary packages
 install_packages() {
     echo "Installing required packages..."
-    
-    # Detect OS and install packages
+
+    # Use sudo to install packages based on the OS
     if [ -f /etc/debian_version ]; then
-        # Debian/Ubuntu
         sudo apt-get update
-        sudo apt-get install -y zsh sudo git stow nnn ncdu tree htop rsync neovim
+        for package in "${packages[@]}"; do
+            sudo apt-get install -y "$package"
+        done
     elif [ -f /etc/arch-release ]; then
-        # Arch Linux
-        sudo pacman -Syu --noconfirm stow nnn ncdu tree htop rsync neovim
+        sudo pacman -Syu --noconfirm "${packages[@]}"
     else
         echo "Unsupported OS. Please install packages manually."
     fi
 }
-
-# Stow the configurations
-stow_configs() {
-    echo "Stowing configurations..."
-    stow -t ~ common
-    echo "Stowing complete."
-}
-
 # Prompt the user for Powerlevel10k installation
 install_powerlevel10k() {
     echo "Do you want to install Powerlevel10k (p10k) on this machine? (yes/no)"
