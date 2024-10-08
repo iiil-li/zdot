@@ -145,9 +145,9 @@ install_nvim_lsps() {
 # Main script execution
 install_packages
 stow_configs
-source $HOME/.zshrc
 install_powerlevel10k
 install_nvim_lsps
-
+echo "sourcing .zshrc"
+source $HOME/.zshrc
 echo "Installation complete."
 
