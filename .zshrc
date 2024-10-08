@@ -79,9 +79,6 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 
 alias ls='ls --color'
 alias n="nvim"
-# add homebrew apps to shell pa
-# #eval "$(/opt/homebrew/bin/brew shellenv)"
-# Created by newuser for 5.9
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
