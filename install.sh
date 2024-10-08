@@ -112,6 +112,7 @@ fi
 
 
 # Prompt for Neovim LSPs to install via Mason and lsp-zero
+
 install_nvim_lsps() {
     echo "Do you want to install Neovim LSPs? (yes/no)"
     read -r install_lsps
@@ -143,31 +144,16 @@ install_nvim_lsps() {
             echo "No LSPs selected."
         else
             echo "Installing the selected LSPs: ${LSP_TO_INSTALL[*]}..."
-            
-            # Ensure that mason and mason-lspconfig are installed and set up
-            nvim --headless -c 'lua << EOF
-                local mason_exists, mason = pcall(require, "mason")
-                local mason_lsp_exists, mason_lspconfig = pcall(require, "mason-lspconfig")
-                
-                if mason_exists then
-                    mason.setup()
-                end
-                
-                if mason_lsp_exists then
-                    mason_lspconfig.setup {
-                        ensure_installed = { "'${LSP_TO_INSTALL[*]}'" }
-                    }
-                else
-                    print("mason-lspconfig not installed. Please check your Neovim setup.")
-                end
-            EOF' -c "q"
+
+            # Pass LSPs as a comma-separated list to Mason and install them
+            nvim --headless -c "lua require('mason').setup(); require('mason-lspconfig').setup { ensure_installed = { '${LSP_TO_INSTALL[*]// /,}' } }" -c "q"
+
             echo "LSP installation complete."
         fi
     else
         echo "Skipping Neovim LSP installation."
     fi
 }
-
 
 # Main script execution
 install_packages
