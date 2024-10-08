@@ -1,56 +1,20 @@
 #!/bin/bash
 
-# Define an array of packages to install (one per line)
+# Define an array of packages to install (one per line, excluding Neovim and fzf which we'll get from GitHub)
 packages=(
-fzf
-	zsh
-	tmux
-	stow
+    stow
     nnn
     ncdu
     tree
     htop
     rsync
-    neovim
+    git  # Ensure git is installed to clone repositories
+    curl # Ensure curl is installed to download scripts
+    build-essential  # Needed to build Neovim from source
+    unzip  # Required for fzf installation
 )
 
-# Check if sudo is installed
-check_and_install_sudo() {
-    if ! command -v sudo &> /dev/null; then
-        echo "sudo is not installed. Attempting to install..."
-
-        # Switch to root and install sudo
-        echo "Please enter the root password to switch to root and install sudo."
-        su -c 'if [ -f /etc/debian_version ]; then
-                apt update && apt install -y sudo;
-              elif [ -f /etc/arch-release ]; then
-                pacman -Syu --noconfirm sudo;
-              else
-                echo "Unsupported OS. Please install sudo manually.";
-                exit 1;
-              fi'
-
-        if ! command -v sudo &> /dev/null; then
-            echo "Failed to install sudo. Exiting."
-            exit 1
-        fi
-    fi
-
-    # Check if the user is already in the sudoers file
-    if ! sudo -l | grep -q "(ALL) ALL"; then
-        echo "Adding $USER to the sudoers file..."
-        
-        # Directly append to /etc/sudoers (use visudo for safety in real usage)
-        su -c "echo '$USER ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
-        
-        echo "$USER has been added to sudoers. Please log out and log back in to apply group changes."
-        exit 0
-    else
-        echo "$USER is already in the sudoers file."
-    fi
-}
-
-# Function to install necessary packages
+# Function to install necessary packages (excluding Neovim and fzf)
 install_packages() {
     echo "Installing required packages..."
 
@@ -67,12 +31,45 @@ install_packages() {
     fi
 }
 
-# Prompt the user for Powerlevel10k installation
-#!/bin/bash
+# Install the latest version of Neovim from GitHub
+install_neovim() {
+    echo "Installing Neovim from GitHub..."
+    
+    # Clone Neovim repository
+    git clone https://github.com/neovim/neovim.git
+    
+    # Switch to stable branch
+    cd neovim || exit
+    git checkout stable
+    
+    # Build Neovim
+    make CMAKE_BUILD_TYPE=Release
+    
+    # Install Neovim
+    sudo make install
+    
+    # Go back to the home directory
+    cd ..
+    
+    # Remove Neovim source after installation (optional)
+    rm -rf neovim
+}
 
-# Prompt the user about installing Powerlevel10k
-echo "Do you want to install Powerlevel10k (p10k) on this machine? (yes/no)"
-read -r install_p10k
+# Install fzf from GitHub
+install_fzf() {
+    echo "Installing fzf from GitHub..."
+    
+    # Clone the fzf repository
+    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+    
+    # Run the fzf install script
+    ~/.fzf/install --all
+}
+
+# Main script execution
+install_packages
+install_neovim
+install_fzf
 
 # Function to install Powerlevel10k
 install_powerlevel10k() {
@@ -86,7 +83,7 @@ install_powerlevel10k() {
         git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
     fi
     
-    # Add Powerlevel10k to .zshrc
+    # Add Perlevel10k to .zshrc
     echo "Adding Powerlevel10k configuration to .zshrc..."
     cat <<EOT >> ~/.zshrc
 
@@ -107,9 +104,6 @@ if [ "$install_p10k" = "yes" ]; then
 else
     echo "Skipping Powerlevel10k installation."
 fi
-
-
-
 
 # Prompt for Neovim LSPs to install via Mason and lsp-zero
 
