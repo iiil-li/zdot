@@ -76,17 +76,12 @@ vim.cmd('filetype plugin indent on')
 -- Set colorscheme
 vim.cmd [[colorscheme gruvbox]]
 
--- Mason setup
-require("mason").setup()
-
--- Mason LSPConfig setup
-require("mason-lspconfig").setup {
-	ensure_installed = { "lua_ls", "ts_ls", "gopls", "html", "cssls", "bashls", "pyright", "ansiblels" }
-}
-
 -- LSP setup
-local lsp_zero = require('lsp-zero')
-local null_ls = require("null-ls")
+local lsp_zero = require('lsp-zero').preset({})
+require("mason").setup()
+require('mason-lspconfig').setup()
+
+
 lsp_zero.on_attach(function(client, bufnr)
 	lsp_zero.default_keymaps({ buffer = bufnr })
 
@@ -105,205 +100,39 @@ end)
 
 lsp_zero.setup()
 
--- Individual LSP server configurations
-local lspconfig = require('lspconfig')
+-- Lazy install an LSP when requested
+local function install_lsp(lsp_name)
+	vim.cmd('MasonInstall ' .. lsp_name)
+end
 
--- Lua setup
-lspconfig.lua_ls.setup({
-	settings = {
-		Lua = {
-			runtime = {
-				version = 'LuaJIT',
-			},
-			diagnostics = {
-				globals = { 'vim' },
-			},
-			workspace = {
-				library = vim.api.nvim_get_runtime_file("", true),
-			},
-			telemetry = {
-				enable = false,
-			},
-		},
-	},
-})
---ts pls
-lspconfig.ts_ls.setup {
-	filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
-	root_dir = lspconfig.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git"),
-	on_attach = function(client, bufnr)
-		-- Updated: Disable formatting in favor of another plugin
-		client.server_capabilities.documentFormattingProvider = true
-		client.server_capabilities.documentRangeFormattingProvider = true
+-- Function to check and install LSP on request
+local function request_lsp_install(lsp_name)
+	local present, lspconfig = pcall(require, 'lspconfig')
 
-		-- Optional: Define custom key mappings or settings here
-		-- Example: Set up buffer local keymaps for LSP
-		local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-		local opts = { noremap = true, silent = true }
+	if present and lspconfig[lsp_name] then
+		lspconfig[lsp_name].setup({})
+	else
+		print('LSP not found. Installing ' .. lsp_name .. '...')
+		install_lsp(lsp_name)
+	end
+end
 
-		-- Mappings (examples)
-		buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-		buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
-		buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-		buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+-- Command to install LSP dynamically (e.g., `:LspInstall bashls`)
+vim.api.nvim_create_user_command('LspInstall', function(opts)
+	request_lsp_install(opts.args)
+end, {
+	nargs = 1,
+	complete = function()
+		-- Return a list of available LSPs for autocompletion
+		return vim.tbl_keys(require('mason-lspconfig.mappings.server').package_to_lspconfig)
 	end,
-	settings = {
-		-- Optional: Specific settings for tsserver
-		javascript = {
-			suggest = {
-				autoImports = true,
-			},
-		},
-		typescript = {
-			suggest = {
-				autoImports = true,
-			},
-		},
-	},
-}
-
--- Bash setup
-lspconfig.bashls.setup({
-	on_attach = lsp_zero.on_attach,
-	filetypes = { "sh", "bash" },
-	root_dir = lspconfig.util.find_git_ancestor or lspconfig.util.path.dirname,
 })
 
---json
--- JSON LSP setup (using vscode-json-languageserver)
-lspconfig.jsonls.setup({
-	on_attach = function(client, bufnr)
-		lsp_zero.on_attach(client, bufnr)
-
-		-- Ensure document formatting on save is enabled
-		if client.server_capabilities.documentFormattingProvider then
-			vim.api.nvim_create_autocmd("BufWritePre", {
-				buffer = bufnr,
-				callback = function()
-					vim.lsp.buf.format({ async = false })
-				end
-			})
-		end
-	end,
-	filetypes = { "json", "jsonc" }, -- JSON and JSON with Comments
-	settings = {
-		json = {
-			validate = { enable = true }, -- Enable validation of JSON files
-			format = { enable = true } -- Enable auto-formatting for JSON
-		},
-	},
-	root_dir = lspconfig.util.find_git_ancestor or lspconfig.util.path.dirname,
-})
--- TexLab setup
-lspconfig.texlab.setup({
-	settings = {
-		texlab = {
-			auxDirectory = ".",
-			bibtexFormatter = "texlab",
-			build = {
-				args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f" },
-				executable = "latexmk",
-				forwardSearchAfter = false,
-				onSave = true,
-			},
-			forwardSearch = {
-				args = { "--synctex-forward", "%l:1:%f", "%p" },
-				executable = "zathura",
-			},
-			latexFormatter = "latexindent",
-			latexindent = {
-				modifyLineBreaks = true,
-			},
-		},
-	},
-})
-
--- Markdown setup (marksman)
-lspconfig.marksman.setup({
-	-- If you want to pass any specific settings for marksman, add them here
-})
--- Null-ls setup for markdownlint via Mason
-null_ls.setup({
-	sources = {
-		-- Connect markdownlint installed via Mason
-		null_ls.builtins.diagnostics.markdownlint.with({
-			command = vim.fn.stdpath("data") .. "/mason/bin/markdownlint", -- Use Mason-installed markdownlint
-			filetypes = { "markdown" },               -- Enable markdownlint for Markdown files
-			extra_args = { "--disable", "MD013" },    -- Example: Disable MD013 (line length)
-		}),
-		-- You can also set up markdownlint for formatting
-		null_ls.builtins.formatting.markdownlint.with({
-			command = vim.fn.stdpath("data") .. "/mason/bin/markdownlint", -- Use Mason-installed markdownlint
-		}),
-	},
-})
+-- Example keybinding to install LSPs (optional)
+vim.api.nvim_set_keymap('n', '<leader>li', ':LspInstall<Space>', { noremap = true, silent = false })
 
 -- Optional: If you want automatic formatting on save
 vim.cmd [[autocmd BufWritePre *.md lua vim.lsp.buf.format({ async = true })]]
-
--- Go setup
-lspconfig.gopls.setup({
-	on_attach = lsp_zero.on_attach,
-	settings = {
-		gopls = {
-			analyses = {
-				unusedparams = true,
-			},
-			staticcheck = true,
-		},
-	},
-})
-
--- Python setup
-lspconfig.pyright.setup({
-	on_attach = lsp_zero.on_attach,
-	settings = {
-		python = {
-			analysis = {
-				typeCheckingMode = "off",
-				autoSearchPaths = true,
-				useLibraryCodeForTypes = true,
-			},
-		},
-	},
-})
-
--- Ansible setup
-lspconfig.ansiblels.setup({
-	on_attach = lsp_zero.on_attach,
-	settings = {
-		ansible = {
-			ansibleLint = {
-				enabled = true,
-			},
-			executionEnvironment = {
-				enabled = false,
-			},
-		},
-	},
-	filetypes = { "yaml.ansible", "ansible" },
-})
--- HTML setup
-lspconfig.html.setup({
-	on_attach = lsp_zero.on_attach,
-	filetypes = { "html" },
-	init_options = {
-		configurationSection = { "html", "css", "javascript" },
-		embeddedLanguages = {
-			css = true,
-			javascript = true
-		},
-	},
-	settings = {
-		html = {
-			format = {
-				enable = true, -- Enable formatting
-				wrapLineLength = 120,
-				wrapAttributes = "auto",
-			},
-		},
-	},
-})
 
 -- Enable line wrapping for log files
 vim.cmd [[ autocmd BufRead,BufNewFile *.log setlocal wrap ]]

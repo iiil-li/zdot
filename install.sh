@@ -114,50 +114,6 @@ else
     echo "Skipping Powerlevel10k installation."
 fi
 
-# Prompt for Neovim LSPs to install via Mason and lsp-zero
-
-install_nvim_lsps() {
-    echo "Do you want to install Neovim LSPs? (yes/no)"
-    read -r install_lsps
-
-    if [ "$install_lsps" = "yes" ]; then
-        echo "Available LSPs:"
-        echo "1) lua_ls"
-        echo "2) ts_ls"
-        echo "3) gopls"
-        echo "4) html"
-        echo "5) cssls"
-        echo "6) bashls"
-        echo "7) pyright"
-        echo "8) ansiblels"
-        echo "Enter the numbers corresponding to the LSPs you want to install, separated by spaces (e.g., '1 3 5'):"
-        read -r selected_lsps
-
-        # Create an array of LSPs
-        LSP_ARRAY=("lua_ls" "ts_ls" "gopls" "html" "cssls" "bashls" "pyright" "ansiblels")
-        LSP_TO_INSTALL=()
-
-        for number in $selected_lsps; do
-            if [ $number -ge 1 ] && [ $number -le 8 ]; then
-                LSP_TO_INSTALL+=("${LSP_ARRAY[$((number - 1))]}")
-            fi
-        done
-
-        if [ ${#LSP_TO_INSTALL[@]} -eq 0 ]; then
-            echo "No LSPs selected."
-        else
-            echo "Installing the selected LSPs: ${LSP_TO_INSTALL[*]}..."
-
-            # Pass LSPs as a comma-separated list to Mason and install them
-            nvim --headless -c "lua require('mason').setup(); require('mason-lspconfig').setup { ensure_installed = { '${LSP_TO_INSTALL[*]// /,}' } }" -c "q"
-
-            echo "LSP installation complete."
-        fi
-    else
-        echo "Skipping Neovim LSP installation."
-    fi
-}
-
 # Main script execution
 # Main script execution
 install_packages
