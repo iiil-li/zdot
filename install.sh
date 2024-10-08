@@ -8,7 +8,7 @@ install_packages() {
     if [ -f /etc/debian_version ]; then
         # Debian/Ubuntu
         sudo apt-get update
-        sudo apt-get install -y stow nnn ncdu tree htop rsync neovim
+        sudo apt-get install -y zsh sudo git stow nnn ncdu tree htop rsync neovim
     elif [ -f /etc/arch-release ]; then
         # Arch Linux
         sudo pacman -Syu --noconfirm stow nnn ncdu tree htop rsync neovim
