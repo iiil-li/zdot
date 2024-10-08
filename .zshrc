@@ -1,9 +1,10 @@
+
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 export PATH="$PATH:/opt/nvim-linux64/bin"
 export PATH=$PATH:~/.npm-global/bin
-alias snvim='sudo env "PATH=$PATH" nvim -u /home/zed/.config/nvim/init.lua'
+alias snvim='sudo env "PATH=$PATH" nvim -u $HOME/.config/nvim/init.lua'
 
 #set zinit plugin dir
 
@@ -86,7 +87,7 @@ alias n="nvim"
 
 eval "$(fzf --zsh)"
 # bun completions
-[ -s "/Users/zed/.bun/_bun" ] && source "/Users/zed/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
