@@ -21,8 +21,6 @@ vim.opt.rtp:prepend(lazypath)
 -- Lazy's list of plugins
 require('lazy').setup({
 	{ 'folke/tokyonight.nvim' },
-
-
 	{ 'L3MON4D3/LuaSnip' },
 	{ 'ellisonleao/gruvbox.nvim' },
 	{
@@ -40,7 +38,13 @@ require('lazy').setup({
 		'ThePrimeagen/harpoon',
 		dependencies = { 'nvim-lua/plenary.nvim' }
 	},
-	{ 'mtdl9/vim-log-highlighting' }
+	{ 'mtdl9/vim-log-highlighting' },
+  { 'williamboman/mason.nvim', config = true },
+  { 'williamboman/mason-lspconfig.nvim', config = true },
+  { 'VonHeikemen/lsp-zero.nvim', branch = 'v3.x' },
+  { 'neovim/nvim-lspconfig' },
+  { 'hrsh7th/cmp-nvim-lsp' },
+  { 'hrsh7th/nvim-cmp' },
 })
 
 -- Basic settings
@@ -111,3 +115,34 @@ vim.keymap.set("n", "<C-h>", function() ui.nav_file(1) end)
 vim.keymap.set("n", "<C-t>", function() ui.nav_file(2) end)
 vim.keymap.set("n", "<C-n>", function() ui.nav_file(3) end)
 vim.keymap.set("n", "<C-s>", function() ui.nav_file(4) end)
+
+-- Basic LSP-zero configuration
+local lsp = require('lsp-zero').preset({})
+
+-- Mason setup
+require('mason').setup()
+require('mason-lspconfig').setup()
+
+-- LSP configuration
+lsp.on_attach(function(client, bufnr)
+  lsp.default_keymaps({ buffer = bufnr })
+end)
+
+lsp.setup()
+
+
+
+-- Basic LSP-zero configuration
+local lsp = require('lsp-zero').preset({})
+
+-- Mason setup
+require('mason').setup()
+require('mason-lspconfig').setup()
+
+-- LSP configuration
+lsp.on_attach(function(client, bufnr)
+  lsp.default_keymaps({ buffer = bufnr })
+end)
+
+lsp.setup()
+

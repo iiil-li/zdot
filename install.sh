@@ -2,7 +2,8 @@
 
 # Define an array of packages to install (one per line, excluding Neovim and fzf which we'll get from GitHub)
 packages=(
-    stow
+    ripgrep
+	stow
     nnn
     ncdu
     tree
