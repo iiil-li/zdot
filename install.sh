@@ -155,6 +155,6 @@ stow -t "$HOME" .
 echo "changing shell"
 chsh -s /bin/zsh
 echo "sourcing .zshrc"
-source $HOME/.zshrc
+/bin/zsh "source $HOME/.zshrc"
 echo "Installation complete."
 
