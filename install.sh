@@ -2,6 +2,7 @@
 
 # Define an array of packages to install (one per line)
 packages=(
+fzf
 	zsh
 	tmux
 	stow
