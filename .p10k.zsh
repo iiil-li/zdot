@@ -28,11 +28,31 @@
 
   # Zsh >= 5.1 is required.
   [[ $ZSH_VERSION == (5.<1->*|<6->.*) ]] || return
+####################################[ custom: environment ]####################################
+# Custom segment to display environment (hostname)
+function prompt_environment() {
+  local environment=""
+  
+  if [[ -n "$HOST" ]]; then
+    environment="$HOST"
+  elif [[ -n "$HOSTNAME" ]]; then
+    environment="$HOSTNAME"
+  else
+    environment="Environment not set!"
+  fi
 
+  # Display the environment in purple, or red if not set
+  if [[ "$environment" == "Environment not set!" ]]; then
+    p10k segment -f red -t "$environment"
+  else
+    p10k segment -f 141 -t "$environment"  # Purple color code
+  fi
+}
   # The list of segments shown on the left. Fill it with the most important segments.
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
     # =========================[ Line #1 ]=========================
     # os_icon               # os identifier
+    environment
     dir                     # current directory
     vcs                     # git status
     # =========================[ Line #2 ]=========================
